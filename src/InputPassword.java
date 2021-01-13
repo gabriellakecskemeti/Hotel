@@ -1,3 +1,4 @@
+import java.io.Console;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -11,13 +12,16 @@ public class  InputPassword{
         try {
             DataAccess dataAccess=new DataAccess();
             connection = dataAccess.getConnection();
+            String inputUser;
+            String inputPassword;
             try {
                 do {
                     System.out.println("Enter username");
                     Scanner scanner = new Scanner(System.in);
-                    String inputUser= scanner.nextLine();
+                    inputUser = scanner.nextLine().trim();
                     System.out.println("Enter password");
-                    String inputPassword= scanner.nextLine();
+                    inputPassword = scanner.nextLine().trim();
+
                     PreparedStatement passWordDatabase = connection.prepareStatement("SELECT staff.id,staff.username, staff.password FROM staff");
                     ResultSet rs = passWordDatabase.executeQuery();
                     String usernameDatabase1="";
@@ -27,32 +31,32 @@ public class  InputPassword{
                         count++;
                         usernameDatabase1= rs.getString("username");
                         passWordDatabase1= rs.getString("password");
-                        int userId=rs.getInt("id");
-                        if (inputUser.equals(usernameDatabase1) && inputPassword.equals(passWordDatabase1)) {
-                            AddNewBooking.userName=usernameDatabase1;
-                            AddNewBooking.userId=userId;
+                        boolean matched = DataAccess.validatePassword(inputPassword, passWordDatabase1);
+                        if (matched){
                             return true;
                         }
+
                 }
-                System.out.println("\n Please enter Valid username and password");
+                System.out.println("\nPlease enter Valid username and password");
                 valid=false;
             }while (!valid);
 
             }catch (Exception e) {
-                System.out.println("The data base is not available");
+                System.out.println("The data base is not available1");
                 e.printStackTrace();
             }
             connection.close();
         } catch (SQLException sql) {
             System.out.println("The Data Base is not available!");
-            sql.printStackTrace();
+            //sql.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }finally{
             try {
-                connection.close();
+                if (connection!=null){
+                connection.close();}
             } catch (SQLException throwables) {
-                //throwables.printStackTrace();
+                throwables.printStackTrace();
             }
         }
         return false;

@@ -1,14 +1,14 @@
 
-import java.sql.SQLException;
+
 import java.util.Scanner;
 
 public class Menu {
 
 
-    public Menu mainMenu(Menu menu) {
+    public static Menu mainMenu() {
         printHeader();
 
-        int selection; //= -1;
+        int selection= -1;
 
         do {
             printMenu();
@@ -18,47 +18,35 @@ public class Menu {
             switch (selection) {
                 case 1:
                     //method to show all rooms
-                    Room room=new Room();
-                    room.showAll_Rooms();
-                    return menu.mainMenu(menu);
+                    RoomMenu.showRoomMenu();
+                    return mainMenu();
                 case 2:
-                    Guest guest=new Guest();
-                    guest.displayAllGuests(1);
-                    return menu.mainMenu(menu);
+                    GuestMenu.showGuestMenu();
+                    return mainMenu();
                 case 3:
+                    BookingMenu.showBookingMenu();
+                    return mainMenu();
+                case 4:
                     Room availableRoom=new Room();
                     availableRoom.showAllAvailableRoom();
-                    return menu.mainMenu(menu);
-                case 4:
-                    Guest guestNow=new Guest();
-                    guestNow.displayAllGuests(2);
-                    return menu.mainMenu(menu);
+                    return mainMenu();
                 case 5:
-                    Guest newGuest=new Guest();
-                    newGuest.addNewGuest();
-                    return menu.mainMenu(menu);
-                case 6:
-                    AddNewBooking anbObj=new AddNewBooking();
-                    anbObj.addNewBooking();
-                    return menu.mainMenu(menu);
-                case 7:
-                    System.out.println("Place holder");
-                    WorkInvoice.createInvoice();
-                    return menu.mainMenu(menu);
+                    UserMenu.showUserMenu();
+                    return mainMenu();
                 case 0:
-                    return menu;    //it would be also good to  give back a null.
+                    return null;
                 default:
                     System.out.println("The selection was invalid!");
             }
-        } while (selection != 0);
-        return menu;
+         } while (selection != 0);
+        return null;
     }
 
 
 
 
 
-    public int enterSelection(){
+    public static int enterSelection(){
         Scanner scanner= new Scanner(System.in);
         int selection = -1;
         boolean exit=false;
@@ -66,7 +54,7 @@ public class Menu {
         while(!exit ) {
             System.out.println("Insert selection: ");
             try {
-                selection = Integer.parseInt(scanner.nextLine());
+                selection = Integer.parseInt(scanner.nextLine().trim());
                 exit=true;
             } catch (Exception e) {
                 System.out.println("Please Enter one of the menu options, only numbers are allowed!");
@@ -76,22 +64,21 @@ public class Menu {
     }
 
 
-    public void printHeader() {
+    public static void printHeader() {
         System.out.println(" ----------------------------------------- ");
         System.out.println("|                 WELCOME                 |");
         System.out.println("|       to the Hotel of Your Dreams       |");
         System.out.println(" ----------------------------------------- ");
     }
 
-    public void printMenu() {
+    public static void printMenu() {
 
-        System.out.println("1.Display all rooms");
-        System.out.println("2.Display all guests");
-        System.out.println("3.Display all available room");
-        System.out.println("4.Display guests in hotel now");
-        System.out.println("5.Create new guest");
-        System.out.println("6.Create booking");
-        System.out.println("7.Create invoice");
+        System.out.println("1.All about our rooms");
+        System.out.println("2.Guest management");
+        System.out.println("3.All about bookings");
+        System.out.println("4.Show all available Room");
+        System.out.println("5.User management");
+
         System.out.println("0.Exit");
     }
 

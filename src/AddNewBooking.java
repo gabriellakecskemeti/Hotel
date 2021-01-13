@@ -9,15 +9,14 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AddNewBooking {
-    static int userId;
-    static String userName;
+
 
     public AddNewBooking() {
     }
 
     public void addNewBooking(){
         System.out.println("Please check the guest data, hier you can enter booking only for existing guest!");
-        String choice=WorkInvoice.askingYesOrNo("Do you want to continue? (Y/N) ");
+        String choice=MyMethods.askingYesOrNo("Do you want to continue? (Y/N) ");
         if (choice.equals("N")){
             return;
         }
@@ -39,7 +38,7 @@ public class AddNewBooking {
             if(period<0){
                 System.out.println("Arrival can not be later, than departure! Try it again, please!");
             }
-        }while(period>=0);
+        }while(period<=0);
 
         System.out.println("Booked nights: "+period);
 
@@ -64,15 +63,15 @@ public class AddNewBooking {
             System.out.println("Price of room: " +price+"   Final amount to pay : "+total);
         }
         String payment_type=enterPaymentType();  //{CREDIT_CARD, PAYPAL,BANK_TRANSFER,CASH}
-        String status=enterStatus();            // {Booked,CANCELLED,PAYED,OPEN}
+        String status=enterStatus();            // {Booked,CANCELLED,PAID,OPEN}
         String notes = enterNotes();
 
-        int fk_staff_id=AddNewBooking.userId;
+        int fk_staff_id=Staff.userIdOnline;
         if (fk_staff_id==0){
             fk_staff_id=1;
         }
         MyBooking newBooking= new MyBooking(0,arrival,departure,total,payment_type,status,notes,
-                guest.getId(),fk_room_id,fk_staff_id,guest.getFirstName(),guest.getLastName(),0,userName);
+                guest.getId(),fk_room_id,fk_staff_id,guest.getFirstName(),guest.getLastName(),0,Staff.userNameOnline);
         int newBookingId=writeNewBooking(newBooking,con);
         try {
             con.close();
@@ -208,12 +207,8 @@ public class AddNewBooking {
         System.out.println("*****************************************************************************");
         //String formattedId="";
         for(Guest item : list) {
-
-
-            System.out.println("Guest ID: "+item.getId()+"   "+formatMyString(15,item.getFirstName().toUpperCase())+
-                    "  "+formatMyString(20,item.getLastName().toUpperCase()));
-
-
+            System.out.println("Guest ID: "+item.getId()+"   "+MyMethods.formatString(15,item.getFirstName().toUpperCase())+
+                    "  "+MyMethods.formatString(20,item.getLastName().toUpperCase()));
         }
         System.out.println();
         System.out.println();
@@ -221,24 +216,6 @@ public class AddNewBooking {
     }
 
 
-    /**
-     * method formatMyString makes the string for given length for your lists
-     * if the string is shorter than the length in the argument, than some empty char will be added
-     * if it is shorter, the end of string will be cut away
-     * @param length  = how long place I give for this string in the list
-     * @param myString - the string to be formatted
-     * @return formatted string
-     */
-    public String formatMyString(int length,String myString){
-        StringBuilder x= new StringBuilder(length);
-        for (int n=0;n<length;n++){
-            x.append(" ");
-        }
-        String formattedString=myString+x; //field to help formatting name  20 char long in the list
-        formattedString=formattedString.substring(0,length-1);
-
-        return formattedString;
-    }
 
     /**
      *
@@ -256,7 +233,7 @@ public class AddNewBooking {
             System.out.print(text);
             myDate = sc.nextLine();
             try {
-                if (myDate.length()==10){
+                if (myDate.length()>=10){   //if it is longer than 10, it takes first 10 char als datum, rest will be ignored
 
                     exit = isValid(myDate.substring(0, 4) + "-" +
                             myDate.substring(5, 7) + "-" + myDate.substring(8, 10));
@@ -325,7 +302,7 @@ public class AddNewBooking {
                 case 2:
                     return "paypal";
                 case 3:
-                    return "bank transfer";
+                    return "banktransfer";
                 case 4:
                     return "cash";
                 default:
@@ -355,7 +332,7 @@ public class AddNewBooking {
         String paymentType = "";
         boolean exit = false;
         int selection;
-        System.out.println("Please select status! 1.Booked  2. Cancelled 3.Payed 4.Open");
+        System.out.println("Please select status! 1.Booked  2. Cancelled 3.Paid 4.Open");
         while (!exit) {
             selection = enterSelection();
             switch (selection) {
@@ -364,7 +341,7 @@ public class AddNewBooking {
                 case 2:
                     return "cancelled";
                 case 3:
-                    return "payed";
+                    return "paid";
                 case 4:
                     return "";
                 default:
@@ -397,8 +374,8 @@ public class AddNewBooking {
             System.out.println("-----available rooms -----");
             while (rs.next()) {
                 count++;
-                freeRooms.add(new Room(rs.getInt("id"),rs.getFloat("price")));
-                System.out.println("ID: " + rs.getInt("id") + " " + rs.getString("name") + " price: " + rs.getFloat("price"));
+                freeRooms.add(new Room(rs.getInt("id"),rs.getDouble("price")));
+                System.out.println("ID: " + rs.getInt("id") + " " + rs.getString("name") + " price: " + rs.getDouble("price"));
             }
             if(count==0){
                 freeRooms=null;
@@ -430,7 +407,7 @@ public class AddNewBooking {
         try {
             String query1 = "insert into bookings (arrival_date,departure_date,total_price,payment_type,status," +
                     "notes,fk_guest_id,fk_room_id,fk_staff_id) values (?,?,?,?,?,?,?,?,?)";
-            PreparedStatement pst1 = con.prepareStatement(query1);
+            PreparedStatement pst1 = con.prepareStatement(query1, Statement.RETURN_GENERATED_KEYS);
             pst1.setDate(1, (Date) newBooking.arrival);
             pst1.setDate(2, (Date) newBooking.departure);
             pst1.setInt(3, newBooking.total);
@@ -441,14 +418,22 @@ public class AddNewBooking {
             pst1.setInt(8,newBooking.fk_room_id);
             pst1.setInt(9,newBooking.fk_staff_id);
             pst1.executeUpdate();
+
+            //String query2="SELECT  * from bookings ORDER BY ID DESC LIMIT 1";
+            //PreparedStatement pst2=con.prepareStatement(query2);
+            //ResultSet rs = pst2.executeQuery();
+            ResultSet generatedKeys = pst1.getGeneratedKeys();
+            if (!generatedKeys.next()) {
+                // Should never happen
+                System.err.println("There is a problem with the Database, please contact the system Administrator!");
+            } else {
+                bookingId = generatedKeys.getInt(1);
+            }
+            /*if(rs.next()){
+                bookingId=rs.getInt("id");
+            }*/
             con.commit();
             pst1.close();
-            String query2="SELECT  * from bookings ORDER BY ID DESC LIMIT 1";
-            PreparedStatement pst2=con.prepareStatement(query2);
-            ResultSet rs = pst2.executeQuery();
-            if(rs.next()){
-                bookingId=rs.getInt("id");
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

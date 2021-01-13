@@ -106,7 +106,7 @@ public class WorkInvoice {
 
         System.out.println("the report will be generated: "+path);
 
-        String choice = askingYesOrNo("Do you want to change this? Y/N");
+        String choice = MyMethods.askingYesOrNo("Do you want to change this? Y/N");
         boolean exit;
         exit= !choice.equals("Y");
         File file1;
@@ -143,28 +143,38 @@ public class WorkInvoice {
            con.setReadOnly(false);
 
            String query1 = "insert into invoice (fk_bookings_id,fk_staff_id) values (?,?)";
-           PreparedStatement pst1=con.prepareStatement(query1);
+           PreparedStatement pst1=con.prepareStatement(query1,Statement.RETURN_GENERATED_KEYS);
            pst1.setInt(1,bookingObj.id);
            pst1.setInt(2,bookingObj.fk_staff_id);
            pst1.executeUpdate();
            con.commit();
-           pst1.close();
-           String query2="SELECT  * from invoice where fk_bookings_id=" + bookingObj.id;
-           PreparedStatement pst2=con.prepareStatement(query2);
-           ResultSet rs = pst2.executeQuery();
-           boolean invoiceFound=rs.next();
+
+           //after writing new invoice to the invoice table, we need to get the generated ID of the invoice
            int invoiceId=0;
            java.sql.Date invoiceDate=null;
-           if(invoiceFound){
-               invoiceId = rs.getInt("id");
-               invoiceDate = rs.getDate("date");
-               System.out.println("Invoice Id: "+invoiceId+"  Invoice Date: "+invoiceDate);
+           ResultSet generatedKeys = pst1.getGeneratedKeys();
+           if (!generatedKeys.next()) {
+               // Should never happen
+               System.err.println("There is a problem with the Database, please contact the system admintrator!");
+           } else {
+               invoiceId = generatedKeys.getInt(1);
                filename="invoice"+bookingObj.id;
                pathAndFileName=path+"\\"+filename+".txt";
+           }
+           con.commit();
+           pst1.close();
+           //we want to get the generated date of the invoice
+           String query2="SELECT  * from invoice where id=" + invoiceId;
+           PreparedStatement pst2=con.prepareStatement(query2);
+           ResultSet rs = pst2.executeQuery();
+           con.commit();
+           boolean invoiceFound=rs.next();
+           if(invoiceFound){
+               invoiceDate = rs.getDate("date");
+               System.out.println("Invoice Id: "+invoiceId+"  Invoice Date: "+invoiceDate);
            }else{
                System.out.println("There is a big big technical problem, connect please the system Administrator");
            }
-           con.commit();
            pst2.close();
            con.close();
            FileWriter file = new FileWriter(pathAndFileName);
@@ -198,27 +208,7 @@ public class WorkInvoice {
    }
 
 
-    /**
-     *
-     * @param question this is the text,the question to answer with yes or no
-     * @return it gives back Y or N in form of a String object
-     */
-    public static String askingYesOrNo(String question){
-        String choice="";
-        Scanner scanner = new Scanner(System.in);
-        boolean exit=false;
-        while (!exit){
-            System.out.println(question);
-            choice=scanner.nextLine();
-            choice=choice.toUpperCase();
-            if (choice.equals("N") || choice.equals("Y")  ){
-                exit=true;
-            }else{
-                System.out.println("Wrong input, can only be Y/N.");
-            }
-        }
-        return choice.toUpperCase();
-    }
+
 
     public static Connection init(){
         Connection con = null;

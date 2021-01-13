@@ -3,6 +3,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Scanner;
 
 public class MyBooking {
 
@@ -11,7 +12,7 @@ public class MyBooking {
     Date departure;
     int total;
     String payment_type;         //{CREDIT_CARD, PAYPAL,BANK_TRANSFER,CASH}
-    String status;            // {Booked,CANCELLED,PAYED,OPEN}
+    String status;               // {Booked,CANCELLED,PAID,OPEN}
     String notes ;
     int fk_guest_id;
     int fk_room_id;
@@ -41,7 +42,11 @@ public class MyBooking {
         this.staffName = staffName;
     }
 
-
+    /**
+     * Search given id in the sql database/booking table and give back item if it found
+     * @param bookingId  id to search
+     * @return the booking item with the given id
+     */
     public static MyBooking checkBookingId(int bookingId){
         MyBooking selectedBooking=null;
 
@@ -109,7 +114,11 @@ public class MyBooking {
         return selectedBooking;
     }
 
-
+    /**
+     * Schaut nach if an invoice to the booking exists
+     * @param idkey  -booking id to search
+     * @return  1=found, 0=not found
+     */
     public static int checkInvoice(int idkey){
 
         int option;
@@ -144,6 +153,49 @@ public class MyBooking {
         return option;
     }
 
+    public static void listBookings(){
+        Scanner scanner = new Scanner(System.in);
 
+        AddNewBooking anbObj= new AddNewBooking();
+        try {
+            DataAccess dataAccess=new DataAccess();
+            Connection connection = dataAccess.getConnection();
+
+            java.sql.Date fromDate = anbObj.askDate("Date from - YYYY.MM.DD: ");
+            java.sql.Date toDate = anbObj.askDate("Date to   - YYYY.MM.DD: ");
+
+
+            PreparedStatement ps = connection.prepareStatement("select bookings.id, bookings.arrival_date, " +
+                    "bookings.departure_date, bookings.total_price, guests.first_name, guests.Last_name from bookings join guests on bookings.fk_guest_id=guests.id  " +
+                    "where departure_date>=? or arrival_date<=?");
+            ps.setDate(1, fromDate);
+            ps.setDate(2, toDate);
+            ResultSet rs = ps.executeQuery();
+
+            System.out.println("-----Bookings -----");
+            int count=0;
+            double periodTotal=0;
+            while (rs.next()) {
+                count++;
+                System.out.println("Booking ID: " + MyMethods.formatMyInt(3,rs.getInt("bookings.id"))+"    name: "
+                        +MyMethods.formatString(20, rs.getString("guests.first_name"))
+                        +MyMethods.formatString(20, rs.getString("guests.last_name"))+"  Arrival: "
+                        +rs.getDate("bookings.arrival_date")+ "  Departure: " + rs.getDate("bookings.departure_date")
+                        +"    price: " + MyMethods.formatMyDouble(8,rs.getDouble("bookings.total_price")));
+                periodTotal=periodTotal+rs.getDouble("bookings.total_price");
+            }
+            if(count==0){
+                System.out.println("Sorry, there are no bookings in this period.");
+            }else{
+                System.out.println("Total booked in EUR:                                                                                                    "+MyMethods.formatMyDouble(8,periodTotal));
+            }
+            ps.close();
+            rs.close();
+            connection.close();
+            System.out.println();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
 
 }
