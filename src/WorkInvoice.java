@@ -34,7 +34,6 @@ public class   WorkInvoice {
         int invoiceFoundOption= MyBooking.checkInvoice(bookingObj.id);  //0=not found 1=found 9=missing connection
         if (invoiceFoundOption==1) {
             System.out.println("There is already an Invoice for this Booking!");
-            return;
         } else {
             if (invoiceFoundOption == 9) {  //we could not connect the database
                 return;
@@ -47,7 +46,6 @@ public class   WorkInvoice {
                 }
             }
         }
-        return;
     }
 
 
@@ -152,7 +150,7 @@ public class   WorkInvoice {
            ResultSet generatedKeys = pst1.getGeneratedKeys();
            if (!generatedKeys.next()) {
                // Should never happen
-               System.err.println("There is a problem with the Database, please contact the system admintrator!");
+               System.err.println("There is a problem with the Database, please contact the system administrator!");
            } else {
                invoiceId = generatedKeys.getInt(1);
                filename="invoice"+bookingObj.id;
