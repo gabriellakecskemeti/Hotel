@@ -31,12 +31,17 @@ public class AddNewBooking {
         Date arrival;
         Date departure;
         int period;
+        Date today= Date.valueOf(LocalDate.now());
         do {
             arrival=askDate("Please enter the Date of arrival YYYY.MM.DD: ");
             departure = askDate("Please enter the Date of departure YYYY.MM.DD: ");
             period=differenceInDays(arrival.toLocalDate(),departure.toLocalDate());
             if(period<0){
                 System.out.println("Arrival can not be later, than departure! Try it again, please!");
+            }
+            if(arrival.before(today)){
+                period=-1;
+                System.out.println("Arrival can not be earlier than today!");
             }
         }while(period<=0);
 
@@ -179,7 +184,7 @@ public class AddNewBooking {
                 String zip = rs.getString("zip");
                 String country = rs.getString("country");
                 String email = rs.getString("email");
-                java.sql.Date birth = rs.getDate("birth");
+                Date birth = rs.getDate("birth");
                 String phoneNumber = rs.getString("phone_number");
                 String document = rs.getString("document");
                 //java.util.Date arrival = rs.getDate("arrival_date");
@@ -293,23 +298,26 @@ public class AddNewBooking {
 
         boolean exit = false;
         int selection;
-        System.out.println("Please select payment type! 1.Credit Card  2. Paypal 3.Bank transfer 4.Cash");
+
+        ArrayList<String> paymentType=MyMethods.enumReaderV2(" bookings","payment_type");
+        int x=0;
+        System.out.println("Please select payment type!:");
+
+        for (String element:paymentType) {
+            x++;
+            System.out.print("   "+x+"."+element);
+        }
+        System.out.println();
+       // System.out.println("Please select payment type! 1.Credit Card  2. Paypal 3.Bank transfer 4.Cash");
         while (!exit) {
             selection = enterSelection();
-            switch (selection) {
-                case 1:
-                    return "credit card";
-                case 2:
-                    return "paypal";
-                case 3:
-                    return "banktransfer";
-                case 4:
-                    return "cash";
-                default:
-                    System.out.println("The selection was invalid!");
+            if (selection > 0 && selection <= x){
+                return paymentType.get(x - 1);
+            }else{
+                System.out.println("The selection was invalid!");
             }
         }
-        return "cash";
+        return "";
     }
 
     public int enterSelection(){
@@ -329,7 +337,7 @@ public class AddNewBooking {
 
 
     public String enterStatus() {
-        String paymentType = "";
+
         boolean exit = false;
         int selection;
         System.out.println("Please select status! 1.Booked  2. Cancelled 3.Paid 4.Open");
@@ -419,9 +427,6 @@ public class AddNewBooking {
             pst1.setInt(9,newBooking.fk_staff_id);
             pst1.executeUpdate();
 
-            //String query2="SELECT  * from bookings ORDER BY ID DESC LIMIT 1";
-            //PreparedStatement pst2=con.prepareStatement(query2);
-            //ResultSet rs = pst2.executeQuery();
             ResultSet generatedKeys = pst1.getGeneratedKeys();
             if (!generatedKeys.next()) {
                 // Should never happen
@@ -429,9 +434,7 @@ public class AddNewBooking {
             } else {
                 bookingId = generatedKeys.getInt(1);
             }
-            /*if(rs.next()){
-                bookingId=rs.getInt("id");
-            }*/
+
             con.commit();
             pst1.close();
         } catch (SQLException e) {

@@ -2,7 +2,6 @@
 
 
 public class Hotel {
-    static DataAccess dataAccess;
 
     public static void main(String[] args) {
         InputPassword in=new  InputPassword();
@@ -12,7 +11,7 @@ public class Hotel {
             Menu.mainMenu();
             System.out.println("Thank you for running the Application");
         }else{
-            System.out.println("Password entry is unsuccessfully!");
+            System.out.println("Password entry is unsuccessful!");
         }
     }
 }

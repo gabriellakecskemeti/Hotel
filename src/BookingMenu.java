@@ -21,7 +21,7 @@ public class BookingMenu {
                     anbObj.addNewBooking();
                     return showBookingMenu();
                 case 3:
-                    System.out.println("cancel booking");
+                    System.out.println("Cancel booking is under work");
                     return showBookingMenu();
                 case 4:
                     WorkInvoice.createInvoice();

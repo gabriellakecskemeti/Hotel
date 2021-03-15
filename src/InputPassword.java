@@ -1,5 +1,7 @@
-import java.io.Console;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 
@@ -35,15 +37,14 @@ public class  InputPassword{
                         if (matched){
                             return true;
                         }
-
                 }
                 System.out.println("\nPlease enter Valid username and password");
                 valid=false;
             }while (!valid);
 
             }catch (Exception e) {
-                System.out.println("The data base is not available1");
-                e.printStackTrace();
+                System.out.println("The data base is not available");
+               // e.printStackTrace();
             }
             connection.close();
         } catch (SQLException sql) {
@@ -59,6 +60,7 @@ public class  InputPassword{
                 throwables.printStackTrace();
             }
         }
+
         return false;
     }
 

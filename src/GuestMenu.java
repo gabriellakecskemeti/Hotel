@@ -45,7 +45,7 @@ public class GuestMenu {
         System.out.println(" ----------------------------------------- ");
         System.out.println("|                 WELCOME                 |");
         System.out.println("|       to the Hotel of Your Dreams       |");
-        System.out.println("|             Guest Management             |");
+        System.out.println("|             Guest Management            |");
         System.out.println(" ----------------------------------------- ");
     }
 

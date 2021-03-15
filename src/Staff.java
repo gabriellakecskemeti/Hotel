@@ -1,9 +1,7 @@
 import java.security.NoSuchAlgorithmException;
-
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 //Staff is the same like user.
@@ -226,7 +224,7 @@ public class Staff {
                 preparedStatement.setInt(1,selectedStaff.id);
                int result = preparedStatement.executeUpdate();
                if (result==1){
-                   System.out.println("User have been deleted.");
+                   System.out.println("User has been deleted.");
                }else{
                    System.out.println("Please contact the system Administrator, delete is not successful.");
                }

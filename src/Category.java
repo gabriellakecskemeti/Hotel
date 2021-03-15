@@ -3,7 +3,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Category {
@@ -113,7 +112,6 @@ public class Category {
         System.out.println("*****************Room categories*****************");
         if (allCategory.isEmpty()){
             System.out.println("The table of categories is empty!");
-            System.out.println();
         }else {
             System.out.println("  ID   Name                  Capacity      Price    m2   Facilities");
             for (Category element : allCategory) {
@@ -124,8 +122,8 @@ public class Category {
                         MyMethods.formatMyInt(3, element.roomSize)+" | "+element.facilities);
 
             }
-            System.out.println();
         }
+        System.out.println();
     }
 
     public void updateRoomPrice(){

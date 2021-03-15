@@ -1,7 +1,7 @@
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.mysql.cj.jdbc.DatabaseMetaData;
+
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -61,7 +61,7 @@ public class MyBooking {
             query = "SELECT  bookings.id, bookings.arrival_date, bookings.departure_date, bookings.total_price" +
                     ", bookings.payment_type, bookings.status, bookings.notes, bookings.fk_guest_id," +
                     " bookings.fk_room_id, bookings.fk_staff_id, guests.first_name, guests.last_name, " +
-                    "rooms.room_number, staff.name FROM bookings " +
+                    "rooms.room_number, staff.username FROM bookings " +
                     "join guests on bookings.fk_guest_id=guests.id  " +
                     "join rooms on bookings.fk_room_id= rooms.id " +
                     " join staff on bookings.fk_staff_id=staff.id " +
@@ -85,7 +85,7 @@ public class MyBooking {
                 String surname=rs.getString("guests.first_name");
                 String lastname=rs.getString("guests.last_name");
                 int roomNumber= rs.getInt("rooms.room_number");
-                String staffName=rs.getString("staff.name");
+                String staffName=rs.getString("staff.username");
 
                 selectedBooking=new MyBooking(id,
                         arrival,
@@ -194,8 +194,43 @@ public class MyBooking {
             connection.close();
             System.out.println();
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
+    }
+
+
+    public static void cancelBooking(){
+        MyBooking bookingObj= WorkInvoice.askBookingId();
+        if (bookingObj == null) {
+            return;
+        }
+        // next method controls if an invoice to this booking exist
+        //Missing: we should check the status of booking, if it is already cancelled, than the program should say this
+        // and do not let to cancel again
+        int invoiceFoundOption= MyBooking.checkInvoice(bookingObj.id);  //0=not found 1=found 9=missing connection
+        if (invoiceFoundOption==1) {
+            System.out.println("Invoice reversal will be created about cancellation for following booking:");
+            System.out.println("Booking: "+bookingObj.id+"   Guest: "+bookingObj.surName.toUpperCase()+
+                    " "+bookingObj.lastName.toUpperCase()+"   Room number: "+bookingObj.roomNumber+ "   Amount: "+bookingObj.total+ " EUR");
+            if(!WorkInvoice.invoiceReversalGenerator(bookingObj)){
+                System.out.println("I could not generate the reversed Invoice, check your Data Base connection!");
+            }
+        } else {
+            if (invoiceFoundOption == 9) {  //we could not connect the database
+                return;
+            }else{
+                System.out.println("There is no payment relating this Booking! Cancellation will be registered without Payment.");
+                return;
+
+            }
+        }
+        return;
+
+
+
+
+
+
     }
 
 }

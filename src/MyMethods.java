@@ -1,4 +1,5 @@
-import java.sql.Connection;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class MyMethods {
@@ -81,7 +82,7 @@ public class MyMethods {
     }
 
     /**
-     *
+     *it takes a question as parameter and it asks if the answer is yes or no.
      * @param question this is the text,the question to answer with yes or no
      * @return it gives back Y or N in form of a String object
      */
@@ -119,6 +120,45 @@ public class MyMethods {
         }
     }
 
+    /**
+     * it reads the information_schema and gives back the specified enum values (max 100 items)
+     * if the column is not en enum and it has no enum values, the array list will be empty!
+     * @param tname = table name, where is the enum to read
+     * @param cname = the column, it has to be an enum
+     * @return arraylist contains the enum values of specified table column.
+     */
+    static ArrayList<String> enumReaderV2(String tname, String cname){
+        ArrayList<String> enumValues= new ArrayList<>();
+        String tnameapo= "\'"+tname+"\'";
+        String cnameapo= "\'"+cname+"\'";
+        try {
+            String url = "jdbc:mysql://localhost:3306/information_schema" + "?useTimezone=true&serverTimezone=UTC";
+            Connection connection;
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = DriverManager.getConnection(url, "root", "");
+            connection.setAutoCommit(true);
+            connection.setReadOnly(false);
 
+            String x="\"','\"";
+
+            String a= "SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, 7, LENGTH(COLUMN_TYPE) - 8), "+x+", 1 + units.i + tens.i * 10) ,"+x+" , -1) FROM INFORMATION_SCHEMA.COLUMNS CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens WHERE TABLE_NAME = "+"\'"+tname+"\'"+" AND COLUMN_NAME = "+"\'"+cname+"\'";
+
+            PreparedStatement psEnum= connection.prepareStatement(a);
+            ResultSet rsEnum = null;
+            rsEnum = psEnum.executeQuery();
+            while (rsEnum.next()){
+                enumValues.add(rsEnum.getString(1));
+            }
+            rsEnum.close();
+            connection.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }catch (ClassNotFoundException e){
+            e.printStackTrace();
+        }
+        return enumValues;
+    }
+
+      
 
 }

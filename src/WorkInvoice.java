@@ -3,13 +3,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Scanner;
 
-public class WorkInvoice {
+public class   WorkInvoice {
         int id;
         LocalDateTime iDate;
         int fk_bookings_id;
@@ -151,7 +148,7 @@ public class WorkInvoice {
 
            //after writing new invoice to the invoice table, we need to get the generated ID of the invoice
            int invoiceId=0;
-           java.sql.Date invoiceDate=null;
+           Date invoiceDate=null;
            ResultSet generatedKeys = pst1.getGeneratedKeys();
            if (!generatedKeys.next()) {
                // Should never happen
@@ -207,7 +204,122 @@ public class WorkInvoice {
     return true;
    }
 
+    /**
+     * generates Reversed WorkInvoice   the name of the file is: invoiceReversal_X.txt, where X=bookingId
+     *
+     */
+    public static boolean invoiceReversalGenerator(MyBooking bookingObj) {
 
+        String path="C:\\Test";
+        String pathAndFileName = path+"\\invoiceReversalErr.txt";
+        String filename;
+        String pathNew="C:\\Test";
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("the report will be generated: "+path);
+
+        String choice = MyMethods.askingYesOrNo("Do you want to change this? Y/N");
+        boolean exit;
+        exit= !choice.equals("Y");
+        File file1;
+
+        while(!exit) {
+            System.out.println("Old Path: " + path + "   Please enter new Path: ");
+            pathNew = scanner.nextLine();
+
+            file1 = new File(pathNew);
+            if (file1.exists()) {
+                exit = true;
+                pathAndFileName=pathNew+"\\invoiceReversalErr.txt";
+                path=pathNew;
+                System.out.println("Filepath is accepted!" + pathNew);
+            } else {
+                if(pathNew.equals("")){
+                    System.out.println("Empty file path, process finished!");
+                    System.out.println();
+                    return false;
+                }
+                exit = false;
+                System.out.println("NOT existing filepath!" + pathNew);
+            }
+
+        }
+        Connection con;
+        try {
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            String url = "jdbc:mysql://localhost:3306/hotel?useTimezone=true&serverTimezone=UTC";
+            con = DriverManager.getConnection(
+                    url, "root", "");
+            con.setAutoCommit(false);
+            con.setReadOnly(false);
+
+            String query1 = "insert into invoice (fk_bookings_id,fk_staff_id) values (?,?)";
+            PreparedStatement pst1=con.prepareStatement(query1,Statement.RETURN_GENERATED_KEYS);
+            pst1.setInt(1,bookingObj.id);
+            pst1.setInt(2,bookingObj.fk_staff_id);
+            pst1.executeUpdate();
+            con.commit();
+
+            //after writing new invoice to the invoice table, we need to get the generated ID of the invoice
+            int invoiceId=0;
+            Date invoiceDate=null;
+            ResultSet generatedKeys = pst1.getGeneratedKeys();
+            if (!generatedKeys.next()) {
+                // Should never happen
+                System.err.println("There is a problem with the Database, please contact the system admintrator!");
+            } else {
+                invoiceId = generatedKeys.getInt(1);
+                filename="invoiceReversal"+bookingObj.id;
+                pathAndFileName=path+"\\"+filename+".txt";
+            }
+            con.commit();
+            pst1.close();
+            //we want to get the generated date of the invoice
+            String query2="SELECT  * from invoice where id=" + invoiceId;
+            PreparedStatement pst2=con.prepareStatement(query2);
+            ResultSet rs = pst2.executeQuery();
+            con.commit();
+            boolean invoiceFound=rs.next();
+            if(invoiceFound){
+                invoiceDate = rs.getDate("date");
+                System.out.println("Invoice Id: "+invoiceId+"  Invoice Date: "+invoiceDate);
+            }else{
+                System.out.println("There is a big big technical problem, connect please the system Administrator");
+            }
+            pst2.close();
+            con.close();
+            FileWriter file = new FileWriter(pathAndFileName);
+            file.write("\n**************************************************************************" + System.lineSeparator());
+            file.write("\n                   Like in Your Dream Hotel "+System.lineSeparator());
+            file.write("\n                        Invoice Reversal "+System.lineSeparator());
+            file.write( "\n***************************************************************************" + System.lineSeparator());
+            file.write( "\n\n Invoice number: " + invoiceId + " Date: " + invoiceDate + System.lineSeparator());
+            file.write( "\n\n Guest: " + bookingObj.surName.toUpperCase() + "  "+bookingObj.lastName.toUpperCase() + System.lineSeparator());
+            file.write( "\n Room:       " + bookingObj.roomNumber  + System.lineSeparator());
+            file.write( " Booking Id: " + bookingObj.id  + System.lineSeparator());
+            file.write( " Arrival:    " + bookingObj.arrival  + System.lineSeparator());
+            file.write( " Departure:  " + bookingObj.departure  + System.lineSeparator());
+
+            file.write( "\n\n Total amount to pay back: -" + bookingObj.total  + System.lineSeparator());
+            file.write("\n\n Above amount is inclusive 10% value added tax");
+            file.write("\n\n\n\n\n----------------------------------------------------------------------------");
+            file.write("\nLike in Your Dream Hotel, 2100, Nassfeld, Wald Straße 22. Id:984398494974339");
+            file.close();
+            System.out.println("\nSuccessfully wrote report to: "+pathAndFileName);
+            System.out.println();
+
+        } catch(IOException e){
+            System.out.println("An error occurred during writing into the file.");
+            e.printStackTrace();
+        }
+        catch (Exception e){
+            System.out.println("The database is not available! Check your environment and start again!");
+            e.printStackTrace();
+        }
+        return true;
+    }
 
 
     public static Connection init(){
