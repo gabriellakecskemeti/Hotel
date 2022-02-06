@@ -1,4 +1,4 @@
-  -- phpMyAdmin SQL Dump
+-- phpMyAdmin SQL Dump
 -- version 5.0.4
 -- https://www.phpmyadmin.net/
 DROP DATABASE IF EXISTS hotel;
@@ -25,10 +25,10 @@ CREATE TABLE category(
 
 
 INSERT INTO category ( name, capacity, price, roomsize, facilities) VALUES
-( ' single room', 1, 23, 15, 'WLAN, coffee machine, TV, Mini bar'),
-( ' double room', 2, 33, 25, 'WLAN, coffee machine, TV'),
+( 'single room', 1, 23, 15, 'WLAN, coffee machine, TV, Mini bar'),
+( 'double room', 2, 33, 25, 'WLAN, coffee machine, TV'),
 ( 'superior double room', 3, 43, 35, 'WLAN, coffee machine, TV, Mini bar, Kingsize bed'),
-( ' suite', 4, 53, 45, 'WLAN, coffee machine, TV, Mini bar');
+( 'suite', 4, 53, 45, 'WLAN, coffee machine, TV, Mini bar');
 
 
 CREATE TABLE staff (
@@ -44,8 +44,8 @@ CREATE TABLE staff (
 INSERT INTO staff (username, firstname,lastname, password) VALUES
 ('Georg', 'Georg', 'Postman', '1000:c445bc8d8bdd340c43e0dffccd9db174:5ca3daa4cfe8b462dcfe71e5eab95fced93fc5e0c773d7215fa8b1685d753ef6a36a7eb8ff7532c895ec72cf4c6db8993097e4adc96b1c014e780af311d85078'),
 ('Hannah', 'Hannah','doe', '1000:d41ffae9c156160c9ce06ca82d50cf74:26cddb21fab936cc746287f9fadd386d438aaab469debe5cb6d66b22350384b567a2df385e705ad7f7bdaec9f7df1a298e053fe29613469694c70fc11600f81d'),
-('Eva', 'Eva','Müller', '1000:7574d5870fd9d7a7bbca9f1b3034cd08:3e1abfc64729d8c69d4ffba91878b654af8306b683bb99ef5d3296312fb30fcb0b821613aa6d4858dc97372d9690538574780fae9333950ccff6c478e814a154');
-
+('Eva', 'Eva','Müller', '1000:7574d5870fd9d7a7bbca9f1b3034cd08:3e1abfc64729d8c69d4ffba91878b654af8306b683bb99ef5d3296312fb30fcb0b821613aa6d4858dc97372d9690538574780fae9333950ccff6c478e814a154'),
+('test', 'name1','name2', '1000:fdc88c5ebd7792cf4d40532be0e1d6a0:8aa4a90612bef56601bef98fc95747c689ce81187ba5fd51b36902ac255a975a04d117369255ca530df65c686b55a228edd3a4625902f385ed718c2474525470');
 
 
 CREATE TABLE rooms (
