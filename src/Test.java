@@ -15,6 +15,8 @@ import static java.util.Objects.hash;
 public class Test {
     public static void main(String[] args) {
 
+
+
         String test= "abc*kkkk";
         String testa= test.substring(1,2);
 
